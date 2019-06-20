@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<style>
+	ol.main {
+		width:500px;
+		border: 1px solid #000000;
+		min-height: 50px;
+	}
+	li {
+		display: block;
+		margin: 5px;
+		padding: 5px;
+		border: 1px solid #cccccc;
+		color: #0088cc;
+		background: #eeeeee;
+	}
+	</style>
+</head>
+<body>
+	<ol class='simple_with_drop main'>
+
+	</ol>
+	<ol class='simple_with_no_drop'>
+		<li>if
+			<span class="condition"></span>
+			<ol></ol>
+		</li>
+		<li>then
+			<ol></ol>
+		</li>
+		<li>else
+			<ol></ol>
+		</li>
+		<li>custom_item
+			<span class="settings"></span>
+		</li>
+		<li>report</li>
+	</ol>
+	
+
+	<div class="modal fade" id="ifModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title" id="ifModalLabel">If</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			  <span aria-hidden="true">&times;</span>
+			</button>
+		  </div>
+		  <div class="modal-body">
+			<select id="ifCondition" name="condition">
+			  <option value="AND">AND</option>
+			  <option value="OR">OR</option>
+			</select>
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Select</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	
+	<div class="modal fade" id="custom_itemModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title" id="custom_itemModalLabel">custom_item</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			  <span aria-hidden="true">&times;</span>
+			</button>
+		  </div>
+		  <div class="modal-body">
+			<form>
+				<div class="form-group">
+					<label>Type</label>
+					<select id="customType" name="type">
+						<option value="NOTHING"></option>
+						<option value="REG_CHECK">REG_CHECK</option>
+					</select>
+				</div>
+				
+				<div class="form-group">
+					<label>Description</label>
+					<input name="description"></input>
+				</div>
+				
+				<div class="form-group">
+					<label>value_type</label>
+					<select name="value_type">
+						<option value="NOTHING"></option>
+						<option value="POLICY_TEXT">POLICY_TEXT</option>
+					</select>
+				</div>
+				
+				<div class="form-group">
+					<label>value_data</label>
+					<input name="value_data"></input>
+				</div>
+				
+				<div class="form-group">
+					<label>key_item</label>
+					<input name="key_item"></input>
+				</div>
+				
+				<div class="form-group">
+					<label>reg_option</label>
+					<select name="reg_option">
+						<option value="NOTHING"></option>
+						<option value="MUST_EXIST">MUST_EXIST</option>
+					</select>
+				</div>
+			</form>
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			<button type="button" class="btn btn-primary">Save changes</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+
+	<div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title" id="reportModalLabel">report</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			  <span aria-hidden="true">&times;</span>
+			</button>
+		  </div>
+		  <div class="modal-body">
+			<input id="ifCondition"></input>
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Select</button>
+		  </div>
+		</div>
+	  </div>
+	</div>	
+	
+	<script src='js/jquery-3.4.1.js'></script>
+	<script src='js/jquery-sortable.js'></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script>
+		$("ol.simple_with_drop").sortable({
+		  group: 'no-drop',
+		  nested: true,
+		  onDragStart: function ($item, container, _super) {
+			// Duplicate items of the no drop area
+			if(!container.options.drop)
+			  $item.clone().insertAfter($item);
+			_super($item, container);
+		  },
+		  onDrop: function ($item, container, _super, event) {
+			$item.removeClass(container.group.options.draggedClass).removeAttr("style")
+			$("body").removeClass(container.group.options.bodyClass)
+			console.log($item.text());
+			ifRe = /^if/i
+			custom_eventRe = /^custom_item/i
+			reportRe = /^report/i
+			if(ifRe.test($item.text())) {
+				$($item).attr("id", "modalUpdate");
+				$('#ifModal').on('hide.bs.modal', function(event){
+					$('#modalUpdate').find("span").text($('#ifCondition option:selected').val());
+					$('#modalUpdate').attr("id", "");
+					$($(this)).unbind('hide.bs.modal');
+					
+				});
+				$('#ifModal').modal();
+			}
+			else if(custom_eventRe.test($item.text())) {
+				$($item).attr("id", "modalUpdate");
+				$('#custom_itemModal').on('hide.bs.modal', function(event){
+					text=""
+					$(this).find(".form-group").each(function(){
+						value = $(this).find('input').val();
+						if(value != undefined && value != ""){
+							name = $(this).find('input').attr("name");	
+						}
+						else {
+							value = $(this).find('option:selected').val();
+							name = $(this).find('select').attr("name");	
+						}
+						text= text + "\n" + name + " : " + value;
+					});
+					$('#modalUpdate').find("span").text(text)
+					$($(this)).unbind('hide.bs.modal');
+				});
+				$('#custom_itemModal').modal();
+			}
+			else if(reportRe.test($item.text())){
+				$('#reportModal').modal();
+			}
+		  }
+		  
+		});
+		$("ol.simple_with_no_drop").sortable({
+		  group: 'no-drop',
+		  drop: false
+		});
+	</script>
+</body>
+</html>
